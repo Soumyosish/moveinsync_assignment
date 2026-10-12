@@ -97,6 +97,20 @@ The 12-month analysis in the current dataset shows the largest negative-review c
 - Tracking/map-related issues
 - App stability / crash reports
 
+### Methodology & Strategic Approach
+To ensure absolute objectivity and avoid manual sampling bias, I approached this problem by building a programmatic data ingestion and analytics pipeline. 
+
+1. **Targeted Historical Data Capture:** Instead of analyzing a small random sample of reviews, I programmatically indexed and pulled the complete, raw public review history for the MoveInSync Android application across consecutive 6-month and 12-month evaluation boundaries.
+2. **Data Sanitization & Balancing:** I built a cascading string-matching script to sort the incoming reviews into four distinct operational buckets (Login/OTP, GPS/Tracking, App Stability, Operations). The sorting logic uses a mutually exclusive routing filter. This guarantees that multi-problem reviews are isolated cleanly into their single highest-impact categories without inflating the sample counts or breaking statistical totals.
+
+### Production Tools & Infrastructure Stack
+
+* **Node.js (v20 Runtime Engine):** Used as the primary runtime environment to drive backend execution scripts and handle local file system disk streams.
+* **google-play-scraper (npm):** Integrated to interface directly with public Google Play index registries and scrape user reviews chronologically backward via token pagination.
+* **fast-csv (npm):** Used as a streaming writer pipeline to dynamically format and flush thousands of volatile text data blocks out into clean, durable physical CSV spreadsheets.
+* **Pandoc & TexLive (Linux Utilities):** Leveraged within the Continuous Integration layer to compile raw text data summaries down into corporate presentation-ready PDFs immediately when threshold limit metrics are violated.
+* **GitHub Actions (CI/CD Pipelines):** Configured to execute the entire scraping code structure automatically on a recurring schedule to ensure hands-free data continuity.
+
 ## Notes
 
 - The project intentionally prioritizes evidence from the public review corpus rather than a small manually selected sample.
