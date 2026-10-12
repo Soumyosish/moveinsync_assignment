@@ -1,0 +1,58 @@
+name: MoveInSync Play Store Telemetry Automation Pipeline
+
+on:
+  schedule:
+    # Triggers an automated extraction run every single Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    # Allows you to click a button in the GitHub UI to run it manually anytime
+
+jobs:
+  telemetry_extraction_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code Repository
+      uses: actions/checkout@v4
+
+    - name: Initialize Node.js Environment Runtime
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+
+    - name: Provision Production System Dependencies
+      run: |
+        npm install google-play-scraper fast-csv
+        sudo apt-get update
+        sudo apt-get install -y pandoc texlive-latex-base texlive-fonts-recommended
+
+    - name: Execute Resilient Backoff Extraction Ingestion
+      run: node src/file_name.js
+
+    - name: Evaluate Analytics Boundary Threshold Constraints
+      id: telemetry_check
+      run: node src/automate.js
+
+    - name: Compile PDF Report Asset Artifact via Pandoc Compiler
+      if: steps.telemetry_check.outputs.trigger_pdf_build == 'true'
+      run: |
+        mkdir -p artifacts
+        pandoc data/CRITICAL_ALERT_REPORT.md -o artifacts/MoveInSync_Critical_Incident_Report.pdf --variable geometry:margin=1in
+
+    - name: Automatically Commit & Persist Generated Fleet Reports
+      if: always()
+      run: |
+        git config --global user.name "mis-automation-agent[bot]"
+        git config --global user.email "automation_agent@moveinsync.corp"
+        git add moveinsync_12months_low_ratings.csv data/
+        
+        # Capture the PDF file update condition gracefully if compiled
+        if [ -f artifacts/MoveInSync_Critical_Incident_Report.pdf ]; then
+          mkdir -p production_reports
+          cp artifacts/MoveInSync_Critical_Incident_Report.pdf production_reports/
+          git add production_reports/
+        fi
+        
+        git diff-index --quiet HEAD || git commit -m "chore(telemetry): auto-generated fleet incident reports and logs [skip ci]"
+        git push
