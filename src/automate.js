@@ -13,8 +13,8 @@ function generateAutomatedReport() {
     const csvPath = path.join(__dirname, '../data/moveinsync_12months_low_ratings.csv');
     
     if (!fs.existsSync(csvPath)) {
-        console.error(`❌ Execution error: Ingest target CSV metrics table missing at:\n   ${csvPath}`);
-        console.log("\n💡 Path Guidance: Verify that 'moveinsync_12months_low_ratings.csv' is placed inside your 'data' folder.");
+        console.error(` Execution error: Ingest target CSV metrics table missing at:\n   ${csvPath}`);
+        console.log("\n Path Guidance: Verify that 'moveinsync_12months_low_ratings.csv' is placed inside your 'data' folder.");
         process.exit(1);
     }
 
@@ -40,7 +40,7 @@ function generateAutomatedReport() {
         }
     }
 
-    console.log("\n📊 --- Live Fleet Telemetry Analytics ---");
+    console.log("\n --- Live Fleet Telemetry Analytics ---");
     let thresholdViolationDetected = false;
     let alertReasons = [];
 
@@ -56,34 +56,34 @@ function generateAutomatedReport() {
 
     // Conditional Report Trigger Evaluation
     if (thresholdViolationDetected) {
-        console.log(`\n🚨 [ALERT] Operational threshold breach detected for: ${alertReasons.join(', ')}`);
+        console.log(`\n [ALERT] Operational threshold breach detected for: ${alertReasons.join(', ')}`);
         console.log("Compiling markdown summary asset artifacts...");
 
-        const reportTemplate = `# 🚨 MOVEINSYNC CRITICAL INCIDENT REPORT
+        const reportTemplate = `#  MOVEINSYNC CRITICAL INCIDENT REPORT
 Generated automatically on: ${new Date().toISOString()}
 Target Analysis Condition: Outbound Failure Group >= ${CRITICAL_ALERT_THRESHOLD_PCT}%
 
-## 📊 Telemetry Breach Vector Breakdown
+##  Telemetry Breach Vector Breakdown
 * **Primary Violation Drivers:** ${alertReasons.join(', ')}
 * **Total Negative Ingestion Dataset Volume:** ${totalNegatives} entries analyzed.
 
-## 📈 Categorical Distribution Metrics
+##  Categorical Distribution Metrics
 * **Login/OTP Failures:** ${((counts['Login/OTP']/totalNegatives)*100).toFixed(1)}%
 * **GPS/Tracking Latency:** ${((counts['GPS/Tracking']/totalNegatives)*100).toFixed(1)}%
 * **App Core Crash Instability:** ${((counts['App Stability']/totalNegatives)*100).toFixed(1)}%
 * **Operations/Driver Logistics:** ${((counts['Operations/Driver']/totalNegatives)*100).toFixed(1)}%
 
-## 🛡️ Next-Day Action Directive
+##  Next-Day Action Directive
 This artifact indicates a significant regression spike in production user sentiment. Please inspect recent software version deployments immediately.`;
 
         fs.writeFileSync(path.join(__dirname, '../data/CRITICAL_ALERT_REPORT.md'), reportTemplate);
-        console.log("📝 Report generated successfully as 'data/CRITICAL_ALERT_REPORT.md'.");
+        console.log(" Report generated successfully as 'data/CRITICAL_ALERT_REPORT.md'.");
         
         if (process.env.GITHUB_OUTPUT) {
             fs.appendFileSync(process.env.GITHUB_OUTPUT, "trigger_pdf_build=true\n");
         }
     } else {
-        console.log("\n✅ [SUCCESS] Fleet systems operating smoothly inside metric boundaries.");
+        console.log("\n [SUCCESS] Fleet systems operating smoothly inside metric boundaries.");
         if (process.env.GITHUB_OUTPUT) {
             fs.appendFileSync(process.env.GITHUB_OUTPUT, "trigger_pdf_build=false\n");
         }
